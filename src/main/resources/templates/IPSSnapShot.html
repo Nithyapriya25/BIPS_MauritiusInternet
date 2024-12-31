@@ -1,0 +1,482 @@
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:fragment="summary">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<link rel="stylesheet" type="text/css" href="/webjars/bootstrap/4.3.1/css/bootstrap.min.css" th:href="@{/webjars/bootstrap/4.3.1/css/bootstrap.min.css}">
+<link rel="stylesheet" type="text/css" href="/webjars/jquery-ui/1.12.1/jquery-ui.min.css" th:href="@{/webjars/jquery-ui/1.12.1/jquery-ui.min.css}">
+<link rel="stylesheet" type="text/css" href="/webjars/datatables/1.10.19/css/jquery.dataTables.min.css" th:href="@{/webjars/datatables/1.10.19/css/jquery.dataTables.min.css}">
+
+<script src="/webjars/bootstrap/4.3.1/js/bootstrap.min.js" th:src="@{/webjars/bootstrap/4.3.1/js/bootstrap.min.js}"></script>
+<script src="/webjars/popper.js/1.14.7/umd/popper.min.js" th:src="@{/webjars/popper.js/1.14.7/umd/popper.min.js}"></script>
+<script src="/webjars/jquery/3.4.1/jquery.min.js" th:src="@{/webjars/jquery/3.4.1/jquery.min.js}"></script>
+<script src="/webjars/jquery-ui/1.12.1/jquery-ui.min.js" th:src="@{/webjars/jquery-ui/1.12.1/jquery-ui.min.js}"></script>
+<script src="/webjars/jquery-form/4.2.2/jquery.form.min.js" th:src="@{/webjars/jquery-form/4.2.2/jquery.form.min.js}"></script>
+<script src="/webjars/jquery-validation/1.19.0/jquery.validate.min.js" th:src="@{/webjars/jquery-validation/1.19.0/jquery.validate.min.js}"></script>
+<script src="/webjars/datatables/1.10.19/js/jquery.dataTables.min.js" th:src="@{/webjars/datatables/1.10.19/js/jquery.dataTables.min.js}"></script>
+<script src="/webjars/datatables/1.10.19/js/dataTables.bootstrap4.min.js" th:src="@{/webjars/datatables/1.10.19/js/dataTables.bootstrap4.min.js}"></script>
+<script src="js/bootstrap411.js"></script>
+<script src="js/Chart.js"></script>
+
+<style>
+body {
+	background-color: lightgrey;
+}
+
+.h2, h2 {
+	font-size: 2rem;
+	background-color: #555;
+	color: white;
+}
+
+#hidden_div {
+	display: none;
+}
+
+.container-manager {
+	padding-right: 43px;
+	padding-left: 15px;
+	margin-right: auto;
+	margin-left: 18.3%;
+	margin-top: 80px;
+}
+
+input[type="text"] {
+	line-height: 16px;
+	font-size: small;
+	height: 35px;
+}
+
+label {
+	font-size: medium;
+}
+
+.dataTables_empty {
+	color: #be3232;
+}
+
+#overlay {
+	position: fixed;
+	top: 0;
+	z-index: 100;
+	width: 100%;
+	height: 100%;
+	display: none;
+	background: rgba(0, 0, 0, 0.6);
+}
+
+.cv-spinner {
+	height: 100%;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+input::-webkit-outer-spin-button, input::-webkit-inner-spin-button {
+	margin: 0;
+}
+
+#usertable {
+	border-collapse: separate;
+	border-spacing: 0;
+}
+
+#usertable tr {
+	border-bottom: 1px solid #808080;
+}
+
+#usertable td, #usertable th {
+	border: 2px solid #095776;
+	padding: 15px;
+}
+
+#usertable th:last-child, #usertable td:last-child {
+	border-right: none;
+}
+
+td {
+	background-color: #f8f7ff;
+	font-size: small;
+}
+
+table.dataTable thead th, table.dataTable tfoot th {
+	font-weight: normal;
+}
+
+table.table .thead-light th {
+	font-size: 13px;
+	border-color: #d4d7da;
+}
+
+table th {
+	color: white;
+	background-color: #2e455deb;
+	font-size: small;
+}
+
+table, tr {
+	border-collapse: collapse;
+	width: 100%;
+}
+
+th, td {
+	border: 1px solid #dddddd;
+	padding: 12px;
+	text-align: left;
+}
+
+.dataTables_wrapper .dataTables_filter {
+	float: right;
+	margin-right: 20px;
+	margin-top: 10px;
+}
+
+.dataTables_filter input {
+	color: black;
+	background-color: white;
+}
+
+.dataTables_wrapper .dataTables_filter input[type="search"]::placeholder {
+	color: black;
+	font-style: italic;
+}
+
+.dataTables_scrollBody {
+	overflow: unset !important;
+}
+
+#ui-datepicker-div {
+	top: 14% !important;
+	right: 3% !important;
+	left: unset !important;
+}
+</style>
+</head>
+
+<script th:inline="javascript">
+	/*<![CDATA[*/
+
+	$('#draggable-snap-1').draggable({
+				snap : '#draggable-snap-2',
+				snapMode : 'outer'
+	});
+
+	$('#draggable-snap-2').draggable({
+				snap : 'body',
+				snapTolerance : '50'
+	});
+
+	function formatDate(date) {
+		var day = String(date.getDate()).padStart(2, '0');
+		var month = String(date.getMonth() + 1).padStart(2, '0');
+		var year = date.getFullYear();
+		return `${day}-${month}-${year}`;
+	}
+
+	function customerTranView(a) {
+		var message_ref = a.getAttribute("data-sequence_unique_id");
+		location.href = './snapShot?formmode=customerViewSnap&message_ref=' + message_ref;
+	}
+
+	function customerTranView2(sequenceUniqueId) {
+		location.href = './snapShot?formmode=customerViewSnap&message_ref=' + sequenceUniqueId;
+	}
+
+	function getTransactionDetailRecords() {
+		var valueDate = $('#currentDate').val();
+		$.ajax({
+					url : './getTransactionRecords?valueDate=' + valueDate,
+					type : 'GET',
+					success : function(data) {
+						var trHTML = '';
+						if (data.length > 0) {
+							data
+										.forEach(function(entity) {
+											var tranDate = entity.tran_date != null ? entity.tran_date : "";
+											var tranAmount = entity.tran_amount != null ? entity.tran_amount : "";
+											var merchantId = entity.merchant_id != null ? entity.merchant_id : "";
+											var sequenceUniqueId = entity.sequence_unique_id != null ? entity.sequence_unique_id : "";
+											var tranAuditNumber = entity.tran_audit_number != null ? entity.tran_audit_number : "";
+											var user_id = entity.user_id != null ? entity.user_id : "";
+											var unit_id = entity.unit_id != null ? entity.unit_id : "";
+											var unit_name = entity.unit_name != null ? entity.unit_name : "";
+											var ipsxAcct = entity.ipsx_account ? entity.ipsx_account.slice(0, 4) + 'XXXXXXX'
+														+ entity.ipsx_account.slice(-3) : "";
+											var ipsxAcctName = entity.ipsx_account_name != null ? entity.ipsx_account_name : "";
+											var cimAcct = entity.cim_account != null ? entity.cim_account.slice(0, 4) + 'XXXXXXX'
+														+ entity.cim_account.slice(-3) : "";
+											var cimAcctName = entity.cim_account_name != null ? entity.cim_account_name : "";
+											var tranCurrency = entity.tran_currency != null ? entity.tran_currency : "";
+											var tranStatus = entity.tran_status != null ? entity.tran_status : "";
+											var tranRemarks = entity.tran_rmks != null ? entity.tran_rmks : "";
+											var reversalRemarks = entity.reversal_remarks != null ? entity.reversal_remarks : "";
+											var initiator_bank = entity.initiator_bank != null ? entity.initiator_bank : "";
+											var color = tranStatus === 'SUCCESS' ? "green" : "red";
+
+											trHTML += '<tr>' + '<td style="text-align: left;">' + tranDate + '</td>'
+														+ '<td style="text-align: left;">' + sequenceUniqueId + '</td>'
+														+ '<td style="text-align: left;">' + user_id + '</td>' + '<td style="text-align: left;">'
+														+ unit_id + '</td>' + '<td style="text-align: left;">' + initiator_bank + '</td>'
+														+ '<td style="text-align: left;">' + ipsxAcctName + '</td>'
+														+ '<td style="text-align: left;">' + ipsxAcct + '</td>' + '<td style="text-align: left;">'
+														+ tranCurrency + '</td>' + '<td style="text-align: right;">' + tranAmount + '</td>'
+														+ '<td style="text-align:">' + tranStatus + '</td>' + '<td style="text-align: left;">'
+														+ reversalRemarks + '</td>' + '<td style="text-align: left;">'
+														+ '<input type="radio" name="tranRemarks" value=' + sequenceUniqueId
+														+ ' onclick="customerTranView2(this.value);"></td>' + '</tr>';
+										});
+							var userTable = $('#usertable').DataTable({
+										"destroy" : true,
+										"scrollCollapse" : true,
+										"paging" : true,
+										"autoWidth" : false,
+										"ordering" : true,
+										"oLanguage" : {
+													"sSearch" : "",
+													"sSearchPlaceholder" : "Search Here"
+										},
+										"searching" : true,
+										"pageLength" : 10,
+										"lengthChange" : false,
+							});
+							userTable.clear().draw();
+							$('#transactionBody').empty().append(trHTML);
+							userTable.rows.add($('#transactionBody tr')).draw();
+						} else {
+							trHTML += '<tr><td colspan="10" class="text-center" style="color:red;">No data available</td></tr>';
+							$('#transactionBody').empty().append(trHTML);
+							var userTable = $('#usertable').DataTable({
+										"destroy" : true,
+										"scrollCollapse" : true,
+										"paging" : true,
+										"autoWidth" : false,
+										"ordering" : true,
+										"oLanguage" : {
+													"sSearch" : "",
+													"sSearchPlaceholder" : "Search Here"
+										},
+										"searching" : true,
+										"pageLength" : 10,
+										"lengthChange" : false,
+							});
+							userTable.clear().draw();
+						}
+					},
+					error : function() {
+						showErrorModal('Error fetching data');
+					}
+		});
+	}
+
+	function home() {
+		location.href = './IPSDashboard'
+	}
+
+	function back() {
+		window.history.back();
+	}
+
+	$(document).ready(function() {
+		$('#usertable').DataTable({
+					"destroy" : true,
+					"scrollCollapse" : true,
+					"paging" : true,
+					"autoWidth" : false,
+					"ordering" : true,
+					"oLanguage" : {
+								"sSearch" : "",
+								"sSearchPlaceholder" : "Search Here"
+					},
+					"searching" : true,
+					"pageLength" : 10,
+					"lengthChange" : false,
+		});
+	});
+
+	$(document).ready(function() {
+		var currentDate = $.datepicker.formatDate('dd-mm-yy', new Date());
+
+		$("#currentDate").val(currentDate); // Set the current date in the input field
+
+		$("#currentDate").datepicker({
+					dateFormat : 'dd-mm-yy',
+					maxDate : new Date()
+
+		});
+	});
+
+	/*]]>*/
+</script>
+
+<body>
+
+	<div th:insert="MMenupage :: header"></div>
+	<div class="container-manager">
+		<div th:if="${formmode}=='TransDetails'">
+			<div class="card">
+				<div class="card-header">
+					<div class="d-flex justify-content-between align-items-center">
+						<h4 style="color: white; font-size: 1.5rem;">SnapShot</h4>
+						<div>
+							<label style="font-size: 20px !important">Search Records by Date :</label> <input type="text" id="currentDate" class="pl-2" onchange="getTransactionDetailRecords();" readonly>
+						</div>
+					</div>
+				</div>
+				<div class="card-body p-0">
+					<table class="table table-striped table-bordered table-hover table-sm" id="usertable">
+						<thead>
+							<tr>
+								<th>Tran Date</th>
+								<th>Ref ID</th>
+								<th>User Id</th>
+								<th>Unit Id</th>
+								<th>Bank Name</th>
+								<th>Cust Acct Name</th>
+								<th>Cust Account</th>
+								<th>Currency</th>
+								<th>Amount</th>
+								<th>Status</th>
+								<th>Rev Remarks</th>
+								<th>Select</th>
+							</tr>
+						</thead>
+						<tbody id="transactionBody">
+							<tr th:each="details:${Trans}">
+								<td th:text="${details?.tran_date !=null ? #dates.format(details.tran_date,'dd-MM-yyy') :''}"></td>
+								<td th:text="${details?.master_ref_id != null ? details.master_ref_id.toUpperCase() : ''}"></td>
+								<td th:text="${details?.user_id != null ? details.user_id.toUpperCase() : ''}"></td>
+								<td th:text="${details?.unit_id != null ? details.unit_id.toUpperCase() : ''}"></td>
+								<td th:text="${details?.initiator_bank != null ? details.initiator_bank.toUpperCase() : ''}"></td>
+								<td th:text="${details?.ipsx_account_name != null ? details.ipsx_account_name.toUpperCase() : ''}"></td>
+								<td th:text="${details?.ipsx_account != null ? details.ipsx_account.substring(0, 4) + 'XXXXXXX' + details.ipsx_account.substring(details.ipsx_account.length() - 3) : ''}"></td>
+								<td th:text="${details?.tran_currency != null ? details.tran_currency.toUpperCase() : ''}"></td>
+								<td th:text="${details?.tran_amount != null ? #numbers.formatDecimal(details?.tran_amount, 0, 'COMMA', 2, 'POINT') : ''}"></td>
+								<td th:text="${details?.tran_status != null ? details.tran_status.toUpperCase() : ''}"></td>
+								<td th:text="${details?.reversal_remarks != null ? details.reversal_remarks.toUpperCase() : ''}"></td>
+								<td style="text-align: center;"><input type="radio" id="btnclick" name="btnradio" style="cursor: pointer;" th:attr="data-sequence_unique_id=${details.sequence_unique_id}"
+									th:id="${details.sequence_unique_id}" onclick="customerTranView(this);"></td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+				<div class="card-footer text-center">
+					<button type="button" class="btn btn-sm btn-primary" id="btnHome" data-dismiss="modal" onclick="home();">Home</button>
+					<button type="button" class="btn btn-sm btn-primary" id="btnBack" data-dismiss="modal" onclick="back();">Back</button>
+				</div>
+			</div>
+		</div>
+
+		<div class="content" th:if="${formmode}=='customerViewSnap'">
+			<div class="card">
+				<div class=" card-header" style="width: 100%;">
+					<div class="float-left">
+						<h4 style="color: white; font-size: 1.5rem;">Customer Transaction</h4>
+					</div>
+				</div>
+
+				<div class="card-body">
+					<form action="#" method="POST" autocomplete="off" id="ChargeForm" style="width: 100%;" th:object="${viewcharge}">
+						<div>
+							<div class="row formline">
+								<div class="col-sm-1"></div>
+								<div class="col-sm-2" style="text-align: left;">
+									<label for="tran_date" style="font-size: 14px;">Transaction Date </label>
+								</div>
+								<div class="col-sm-2" style="text-align: left;">
+									<input type="text" id="tran_date" name="tran_date" class="form-control form-control-sm" th:value="${#dates.format(viewcustomer?.tran_date, 'dd-MM-yyyy')}" readonly>
+								</div>
+								<div class="col-sm-2"></div>
+								<div class="col-sm-2" style="text-align: left;">
+									<label for="message_id" style="font-size: 14px;">Message Id </label>
+								</div>
+								<div class="col-sm-2">
+									<input type="text" id="sequence_unique_id" name="sequence_unique_id" class="form-control form-control-sm" th:value="${viewcustomer?.sequence_unique_id}" readonly>
+								</div>
+								<div class="col-sm-1"></div>
+							</div>
+							<br>
+							<div class="row formline">
+								<div class="col-sm-1"></div>
+								<div class="col-sm-2" style="text-align: left;">
+									<label for="audit_ref" style="font-size: 14px;">Audit Reference </label>
+								</div>
+								<div class="col-sm-2" style="text-align: left;">
+									<input type="text" id="tran_audit_number" name="tran_audit_number" class="form-control form-control-sm" th:value="${viewcustomer?.tran_audit_number}" readonly>
+								</div>
+								<div class="col-sm-2"></div>
+								<div class="col-sm-2" style="text-align: left;">
+									<label for="merchant_bill_number" style="font-size: 14px;"> Bill Number </label>
+								</div>
+								<div class="col-sm-2">
+									<input type="text" id="merchant_bill_number" name="merchant_bill_number" class="form-control form-control-sm" th:value="${viewcustomer?.merchant_bill_number}" readonly>
+								</div>
+								<div class="col-sm-1"></div>
+							</div>
+							<br>
+							<div class="row formline">
+								<div class="col-sm-1"></div>
+								<div class="col-sm-2" style="text-align: left;">
+									<label for="bill_date" style="font-size: 14px;">Bill Date </label>
+								</div>
+								<div class="col-sm-2" style="text-align: left;">
+									<input type="text" id="bill_date" name="bill_date" class="form-control form-control-sm" th:value="${#dates.format(viewcustomer?.bill_date, 'dd-MM-yyyy')}" readonly>
+								</div>
+								<div class="col-sm-2"></div>
+								<div class="col-sm-2" style="text-align: left;">
+									<label for="bill_amount" style="font-size: 14px;">Bill Amount </label>
+								</div>
+								<div class="col-sm-2">
+									<input type="text" id="bill_amount" name="bill_amount" class="form-control form-control-sm" th:value="${viewcustomer?.bill_amount}" readonly>
+								</div>
+								<div class="col-sm-1"></div>
+							</div>
+							<br>
+							<div class="row formline">
+								<div class="col-sm-1"></div>
+								<div class="col-sm-2" style="text-align: left;">
+									<label for="tran_currency" style="font-size: 14px;">Currency </label>
+								</div>
+								<div class="col-sm-2" style="text-align: left;">
+									<input type="text" id="tran_currency" name="tran_currency" class="form-control form-control-sm" th:value="${viewcustomer?.tran_currency}" readonly>
+								</div>
+								<div class="col-sm-2"></div>
+								<div class="col-sm-2" style="text-align: left;">
+									<label for="reversal_remarks" style="font-size: 14px;">Remarks </label>
+								</div>
+								<div class="col-sm-2">
+									<input type="text" id="reversal_remarks" name="reversal_remarks" class="form-control form-control-sm" th:value="${viewcustomer?.reversal_remarks}" readonly>
+								</div>
+								<div class="col-sm-1"></div>
+							</div>
+							<br>
+							<div class="row formline">
+								<div class="col-sm-1"></div>
+								<div class="col-sm-2" style="text-align: left;">
+									<label for="currency" style="font-size: 14px;">Reversal Date </label>
+								</div>
+								<div class="col-sm-2" style="text-align: left;">
+									<input type="text" id="reversal_date" name="reversal_date" class="form-control form-control-sm" th:value="${#dates.format(viewcustomer?.reversal_date, 'dd-MM-yyyy')}" readonly>
+								</div>
+								<div class="col-sm-2"></div>
+								<div class="col-sm-2" style="text-align: left;">
+									<label for="remarks" style="font-size: 14px;">Reversal Amount </label>
+								</div>
+								<div class="col-sm-2">
+									<input type="text" id="reversal_amount" name="reversal_amount" class="form-control form-control-sm" th:value="${viewcustomer?.reversal_amount}" readonly>
+								</div>
+								<div class="col-sm-1"></div>
+							</div>
+
+						</div>
+					</form>
+				</div>
+				<div class="card-footer text-center">
+					<button type="button" class="btn btn-sm btn-primary" id="btnHome" data-dismiss="modal" onclick="home();">Home</button>
+					<button type="button" class="btn btn-sm btn-primary" id="btnBack" data-dismiss="modal" onclick="back();">Back</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+</body>
+</html>

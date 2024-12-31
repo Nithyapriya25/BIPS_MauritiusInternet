@@ -1,0 +1,618 @@
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:fragment="summary">
+
+<head>
+
+<link rel="stylesheet" type="text/css" th:href="@{/webjars/bootstrap/4.3.1/css/bootstrap.min.css}">
+<script src="/webjars/jquery/3.4.1/jquery.min.js" th:src="@{/webjars/jquery/3.4.1/jquery.min.js}"></script>
+
+<title>IPSAdmin</title>
+
+<style>
+.card-box {
+	background-color: #d9dbdc;
+	background-clip: border-box;
+	padding: 1.1rem;
+	margin-bottom: 24px;
+	border-radius: .25rem;
+	height: 95%;
+}
+
+button {
+	background-color: #616c77;
+	color: white;
+	padding: 16px 20px;
+	border: none;
+	cursor: pointer;
+	opacity: 0.8;
+	bottom: 23px;
+	right: 28px;
+	width: 150px;
+}
+
+select {
+	width: 150px;
+	margin: 10px;
+}
+
+td {
+	background-color: #f8f7ff;
+}
+
+select:focus {
+	min-width: 150px;
+	width: auto;
+}
+
+#hidden_div {
+	display: none;
+}
+
+table th {
+	color: white;
+	background-color: #2e455deb;
+}
+
+.container-manager {
+	padding-right: 15px;
+	padding-left: 15px;
+	margin-right: auto;
+	margin-left: 17.3%;
+	margin-top: 80px;
+}
+
+.content-page {
+	margin-left: 55px;
+	overflow: hidden;
+	padding: 3% 3% 15% 7%;
+	min-height: 80vh;
+	margin-top: 101px;
+}
+
+.input-card {
+	border: 1px solid #ccc;
+	border-radius: 50%;
+	padding: 20px;
+	background-color: transparent;
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+	transition: box-shadow 0.3s ease;
+	width: 170px;
+	height: 170px;
+	text-align: center;
+	display: flex;
+	justify-content: center;
+	color: rgb(0, 177, 157);
+	margin-top: 40px;
+	margin-bottom: 45px;
+}
+
+.input-card:hover {
+	box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.modal-backdrop {
+	z-index: 1040;
+}
+
+#changepassword1 {
+	z-index: 1050;
+}
+
+#myModalpopup1 {
+	z-index: 1060;
+}
+
+.scroll {
+	max-height: 100vh;
+	overflow-y: scroll;
+	overflow-x: scroll;
+}
+
+.form-group input {
+	height: 40px;
+}
+
+.form-group input:focus {
+	color: white !important;
+}
+</style>
+
+</head>
+
+<body>
+	<div th:insert="MMenupage :: header"></div>
+	<div class="container-manager bg-white">
+		<div class="content-page">
+			<div class="content">
+				<!-- <div class="container-fluid">
+					<div class="row">
+						<div class="col-xl-3">
+							<div class="card-box">
+								<h3 class="header-title" style="font-size: 1rem;">Total
+									Count of Transaction</h3>
+								<div class="mt-3 text-center">
+									<input class="input-card" data-plugin="knob"
+										style="display: inline-block; vertical-align: top; font-size: 25px"
+										th:value="${totalsum}" readonly="readonly">
+									<div class="row mt-3">
+										<div class="col-3">
+											<p class="text-muted font-15 mb-1 text-truncate">Success</p>
+											<h4 style="background: #77b179; color: #e6e7e7; width: 100px"
+												th:text="${countsuccess}"></h4>
+										</div>
+										<div class="col-3">
+											<p class="text-muted font-15 mb-1 text-truncate">Failure</p>
+											<h4
+												style="background: #ff8f9f; color: #e6e7e7; width: 100px;"
+												th:text="${countfailure}"></h4>
+										</div>
+										<div class="col-3">
+											<p class="text-muted font-15 mb-1 text-truncate">In
+												Progress</p>
+											<h4
+												style="background: #8a929a; color: #e6e7e7; width: 100px;"
+												th:text="${countinitiated}"></h4>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="col-xl-1"></div>
+
+						<div class="col-xl-3">
+							<div class="card-box">
+								<h3 class="header-title" style="font-size: 1rem;">Total
+									Transactions</h3>
+								<div class="mt-3 text-center">
+									<div id="INC1" class="text-center mt-3"
+										style="margin: 40px 45px; padding: 15px">
+										<canvas
+											style="display: inline-block; width: 210px; height: 210px; vertical-align: top;"></canvas>
+									</div>
+									<div class="row mt-3">
+										<div class="col-3">
+											<p class="text-muted font-15 mb-1 text-truncate">Success</p>
+											<h4 style="background: #77b179; color: #e6e7e7;"
+												th:text="${countsuccess}"></h4>
+										</div>
+										<div class="col-3">
+											<p class="text-muted font-15 mb-1 text-truncate">Failure</p>
+											<h4 style="background: #ff8f9f; color: #e6e7e7;"
+												th:text="${countfailure}"></h4>
+										</div>
+										<div class="col-3">
+											<p class="text-muted font-15 mb-1 text-truncate">In
+												Progress</p>
+											<h4 style="background: #8a929a; color: #e6e7e7;"
+												th:text="${countinitiated}"></h4>
+										</div>
+										<div class="col-3">
+											<p class="text-muted font-15 mb-1 text-truncate">No
+												Transactions</p>
+											<h4 style="background: #f7bb86; color: #e6e7e7;">0</h4>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="col-xl-1"></div>
+						<div class="col-xl-3 stat">
+							<div class="card-box">
+								<h3 class="header-title" style="font-size: 1rem;">Total
+									Count of Users</h3>
+								<div class="mt-3 text-center">
+									<input class="input-card" data-plugin="knob"
+										style="display: inline-block; vertical-align: top; font-size: 25px;"
+										th:value="${countusers}" readonly="readonly">
+									<div class="col-3"></div>
+								</div>
+							</div>
+						</div>
+
+					</div>
+					<br>
+					<br>
+					<br>
+					<br>
+					<br>
+					end row
+					<div class="row">
+						<div class="col-xl-3">
+							<div class="card-box">
+								<h3 class="header-title" style="font-size: 1rem;">Daily
+									Count of Transaction</h3>
+								<div class="mt-3 text-center">
+									<input class="input-card" data-plugin="knob"
+										style="display: inline-block; vertical-align: top; font-size: 25px"
+										th:value="${countDailytrans}" readonly="readonly">
+
+								</div>
+								<br> <br> <br> <br>
+							</div>
+						</div>
+						<div class="col-xl-1"></div>
+						<div class="col-xl-3">
+							<div class="card-box">
+								<h3 class="header-title" style="font-size: 1rem;">Daily
+									Amount of Transaction</h3>
+								<div class="mt-3 text-center">
+									<input class="input-card" data-plugin="knob"
+										style="display: inline-block; vertical-align: top; font-size: 25px"
+										th:value="${counttrans}" readonly="readonly">
+								</div>
+							</div>
+						</div>
+						<div class="col-xl-1"></div>
+						<div class="col-xl-3">
+							<div class="card-box">
+								<h3 class="header-title" style="font-size: 1rem;">Total
+									Count of Device</h3>
+								<div class="mt-3 text-center">
+									<input class="input-card" data-plugin="knob"
+										style="display: inline-block; vertical-align: top; font-size: 25px"
+										th:value="${countdevice}" readonly="readonly">
+								</div>
+							</div>
+						</div>
+					</div>
+				</div> -->
+			</div>
+		</div>
+	</div>
+
+	<div id="myModalpopup" class="modal" data-backdrop="static" data-keyboard="false" style="background: #000000b0;">
+		<div class="modal-content" style="width: 56%; text-align: center; transform: translate(-50%, -50%); top: 50%; left: 50%; text-align: center">
+			<div class="menu-title-header">
+				<div class="modal-title text-left" id="exampleModalLabel" style="color: white; font-size: 17px; padding: 5px;">SECURITY QUESTIONS ( Please fill in at least 3 )</div>
+			</div>
+			<div class="modal-body scroll" style="text-align: center;">
+				<form id="uploadForm1" method="post" autocomplete="off">
+					<input type="text" name="flag" id="flag" autocomplete="off" th:value="${authenticationValue}" class="form-control form-control-sm" hidden="true" />
+					<div class="form-group row">
+						<label for="user_id" class="col-sm-6 col-form-label">User ID <span style="color: red; font-size: 20px;"></span>
+						</label>
+						<div class="col-sm-6">
+							<input type="text" name="user_id" id="user_id" autocomplete="off" th:value="${USERID}" readonly class="form-control form-control-sm" required />
+						</div>
+					</div>
+					<div class="form-group row">
+						<label for="username" class="col-sm-6 col-form-label">User Name <span style="color: red; font-size: 20px;"></span>
+						</label>
+						<div class="col-sm-6">
+							<input type="text" name="username" id="username" th:value="${USERNAME}" autocomplete="off" onkeyup="this.value = this.value.toUpperCase();" readonly class="form-control form-control-sm" required />
+						</div>
+					</div>
+					<div class="form-group row">
+						<label for="security_answer_1" class="col-sm-6 col-form-label">WHAT IS YOUR MOTHER'S NAME? <span style="color: red; font-size: 20px;"></span>
+						</label>
+						<div class="col-sm-6">
+							<input type="text" name="security_answer_1" id="security_answer_1" autocomplete="off" onkeyup="this.value = this.value.toUpperCase();" class="form-control form-control-sm" required />
+						</div>
+					</div>
+					<div class="form-group row">
+						<label for="security_answer_2" class="col-sm-6 col-form-label">WHAT WAS THE NAME OF YOUR FIRST PET? <span style="color: red; font-size: 20px;"></span>
+						</label>
+						<div class="col-sm-6">
+							<input type="text" name="security_answer_2" id="security_answer_2" autocomplete="off" onkeyup="this.value = this.value.toUpperCase();" class="form-control form-control-sm" required />
+						</div>
+					</div>
+					<div class="form-group row">
+						<label for="security_answer_3" class="col-sm-6 col-form-label">WHAT IS YOUR FAVORITE BOOK? <span style="color: red; font-size: 20px;"></span>
+						</label>
+						<div class="col-sm-6">
+							<input type="text" name="security_answer_3" id="security_answer_3" autocomplete="off" onkeyup="this.value = this.value.toUpperCase();" class="form-control form-control-sm" required />
+						</div>
+					</div>
+					<div class="form-group row">
+						<label for="security_answer_4" class="col-sm-6 col-form-label">WHAT IS YOUR FAVORITE FOOD? <span style="color: red; font-size: 20px;"></span>
+						</label>
+						<div class="col-sm-6">
+							<input type="text" name="security_answer_4" id="security_answer_4" autocomplete="off" onkeyup="this.value = this.value.toUpperCase();" class="form-control form-control-sm" required />
+						</div>
+					</div>
+					<div class="form-group row">
+						<label for="security_answer_5" class="col-sm-6 col-form-label">WHAT CITY WERE YOU BORN IN? <span style="color: red; font-size: 20px;"></span>
+						</label>
+						<div class="col-sm-6">
+							<input type="text" name="security_answer_5" id="security_answer_5" autocomplete="off" onkeyup="this.value = this.value.toUpperCase();" class="form-control form-control-sm" required />
+						</div>
+					</div>
+					<div class="form-group row">
+						<label for="security_answer_6" class="col-sm-6 col-form-label">WHAT IS YOUR FAVORITE COLOR? <span style="color: red; font-size: 20px;"></span>
+						</label>
+						<div class="col-sm-6">
+							<input type="text" name="security_answer_6" id="security_answer_6" autocomplete="off" onkeyup="this.value = this.value.toUpperCase();" class="form-control form-control-sm" required />
+						</div>
+					</div>
+					<div class="form-group row">
+						<label for="security_answer_7" class="col-sm-6 col-form-label">WHAT WAS YOUR FIRST CAR? <span style="color: red; font-size: 20px;"></span>
+						</label>
+						<div class="col-sm-6">
+							<input type="text" name="security_answer_7" id="security_answer_7" autocomplete="off" onkeyup="this.value = this.value.toUpperCase();" class="form-control form-control-sm" required />
+						</div>
+					</div>
+					<div class="form-group row">
+						<label for="security_answer_8" class="col-sm-6 col-form-label">WHAT WAS THE NAME OF YOUR ELEMENTARY SCHOOL? <span style="color: red; font-size: 20px;"></span>
+						</label>
+						<div class="col-sm-6">
+							<input type="text" name="security_answer_8" id="security_answer_8" autocomplete="off" onkeyup="this.value = this.value.toUpperCase();" class="form-control form-control-sm" required />
+						</div>
+					</div>
+					<div class="form-group row">
+						<label for="security_answer_9" class="col-sm-6 col-form-label">WHAT IS YOUR FAVORITE MOVIE? <span style="color: red; font-size: 20px;"></span>
+						</label>
+						<div class="col-sm-6">
+							<input type="text" name="security_answer_9" id="security_answer_9" autocomplete="off" onkeyup="this.value = this.value.toUpperCase();" class="form-control form-control-sm" required />
+						</div>
+					</div>
+					<div class="form-group row">
+						<label for="security_answer_10" class="col-sm-6 col-form-label">WHAT IS YOUR FATHER'S MIDDLE NAME? <span style="color: red; font-size: 20px;"></span>
+						</label>
+						<div class="col-sm-6">
+							<input type="text" name="security_answer_10" id="security_answer_10" onkeyup="this.value = this.value.toUpperCase();" class="form-control form-control-sm" required />
+						</div>
+					</div>
+					<div class="text-center">
+						<button type="button" class="btn text-white" style="background-color: #022952;" onclick="submitSecurityAnswer();">Submit</button>
+						<button type="button" class="btn text-white" style="background-color: #022952;" onclick="backToLoginPage()">Back</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal fade" id="changepassword1" data-backdrop="static" data-keyboard="false" style="background: #000000b0;">
+		<div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+			<div class="modal-content" style="color: cadetblue;">
+				<div class="menu-title-header">
+					<div class="modal-title" id="exampleModalLabel" style="text-align: center; color: white;">CHANGE PASSWORD</div>
+				</div>
+				<div class="modal-body" style="text-align: center;">
+					<form id="passSubmitForm" method="post">
+						<div class="form-group">
+							<div class="row">
+								<label class="col-sm-5" style="color: black;">User ID :</label> <input autocomplete="off" class="form-control col-sm-6" type="text" id="userId" th:value="${USERID}" name="userId" readonly />
+							</div>
+							<div class="row mt-2">
+								<label class="col-sm-5" style="color: black;">New Password :</label>
+								<div class="col-sm-6 input-group p-0" style="position: relative;">
+									<input autocomplete="off" class="form-control" type="password" id="newpassData" name="newpass" required style="font-size: 19px;" /> <img id="eye-img-newpass" class="eye-img-card" title="Show Password"
+										th:src="@{/Image/eye.png}" onclick="togglePasswordVisibility('newpassData', 'eye-img-newpass')" style="position: absolute; right: 3px; top: 50%; transform: translateY(-50%); cursor: pointer; height: 32px;" />
+								</div>
+							</div>
+							<div class="row mt-2">
+								<label class="col-sm-5" for="acctName" style="color: black;">Confirm New Password :</label>
+								<div class="col-sm-6 input-group p-0" style="position: relative;">
+									<input class="form-control" autocomplete="off" type="password" id="conpass" name="conpass" required style="font-size: 19px;" /> <img id="eye-img-conpass" class="eye-img-card" title="Show Password"
+										th:src="@{/Image/eye.png}" onclick="togglePasswordVisibility('conpass', 'eye-img-conpass')" style="position: absolute; right: 3px; top: 50%; transform: translateY(-50%); cursor: pointer; height: 32px;" />
+								</div>
+							</div>
+						</div>
+					</form>
+				</div>
+				<div class="text-center bg-white mb-2" style="border: unset;">
+					<button type="button" class="btn text-white" style="background-color: #022952; width: 19%;" form="passSubmitForm" onclick="submitPassword()">Submit</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal fade" id="myModalpopup2" data-backdrop="static" data-keyboard="false" style="background: #000000b0;">
+		<div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+			<div class="modal-content">
+				<h6 class="text-center p-2 text-white font-weight-bold" style="background: #f26223;">BANK OF BARODA</h6>
+				<h6 class="modal-body text-center font-weight-bold" style="color: black !important; font-size: 19px"></h6>
+				<div class="text-center">
+					<button type="button" class="btn mb-2 text-white" style="width: 16%; background: #f26223; font-size: 17px;" data-dismiss="modal" onclick="backToLoginPage()">Close</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal fade" id="myModalpopup1" data-backdrop="static" data-keyboard="false">
+		<div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+			<div class="modal-content">
+				<div class="menu-title-header">
+					<div class="modal-title" id="exampleModalLabel" style="text-align: center; color: white;">BANK OF BARODA</div>
+				</div>
+				<div class="modal-body" style="text-align: center; background-color: #c6ccd2"></div>
+				<div class="modal-footer" style="background-color: #c6ccd2; border-top: none; text-align: center;">
+					<button type="button" class="btn btn-primary" data-dismiss="modal" style="text-align: center;">Close</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script type="text/javascript">
+		function submitSecurityAnswer(event) {
+			var hasError = 0;
+			for (var i = 1; i <= 10; i++) {
+				var securityAnswer = $("#security_answer_" + i).val().trim();
+				if (securityAnswer === "") {
+					hasError += 1;
+				} else {
+					hideError($("#security_answer_" + i));
+				}
+			}
+			if (hasError > 7) {
+				alert("Please fill at least three answers!");
+			} else {
+				var formData = $("#uploadForm1").serialize();
+				$.ajax({
+							url : './submitSecurityQuestions',
+							data : formData,
+							type : 'POST',
+							success : function(response) {
+								var responseObject = typeof response === 'string' ? JSON.parse(response) : response;
+								if (responseObject.authenticate_flg === "Y") {
+									$("#myModalpopup").css("display", "none");
+									$('#changepassword1').modal('show');
+								} else {
+									alert("Authentication failed.");
+								}
+							},
+							error : function(xhr, status, error) {
+								console.error("Error:", error);
+								alert("Failed to submit form. Please try again.");
+							}
+				});
+			}
+		}
+
+		function togglePasswordVisibility(inputId, eyeImgId) {
+			const passwordInput = document.getElementById(inputId);
+			const eyeImg = document.getElementById(eyeImgId);
+			if (passwordInput.type === 'password') {
+				passwordInput.type = 'text';
+				eyeImg.src = '/IPSAdmin/Image/eyeSlide.png';
+				eyeImg.title = "Hide Password";
+			} else {
+				passwordInput.type = 'password';
+				eyeImg.src = '/IPSAdmin/Image/eye.png';
+				eyeImg.title = "Show Password";
+			}
+		}
+
+		function submitPassword() {
+			$.ajax({
+						type : "GET",
+						url : "./getLoginSecurityData",
+						success : function(data) {
+							var getLoginSecurityData = data;
+							var maxLengthPass = parseInt(getLoginSecurityData.pw_length);
+							var errorMsg = "Password must meet the security requirements.";
+							var regexPass = "";
+							if (getLoginSecurityData.com_flg === 'Y') {
+								if (getLoginSecurityData.alpha_flg === 'Y' && getLoginSecurityData.cap_flg === 'Y'
+											&& getLoginSecurityData.num_flg === 'Y' && getLoginSecurityData.spl_char_flg === 'Y') {
+									errorMsg = "Password requires at least one Uppercase, Lowercase, Numeric, and Special character.";
+									regexPass = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*]).{8,}$/;
+								} else if (getLoginSecurityData.alpha_flg === 'Y' && getLoginSecurityData.cap_flg === 'Y'
+											&& getLoginSecurityData.num_flg === 'Y' && getLoginSecurityData.spl_char_flg === 'N') {
+									errorMsg = "Password requires at least one Uppercase, Lowercase, and Numeric character.";
+									regexPass = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9]).{8,}$/;
+								}
+							}
+							var newPass = $("#newpassData").val();
+							var conPass = $("#conpass").val();
+							if (!regexPass.test(newPass)) {
+								alert(errorMsg);
+								return false;
+							}
+							if (newPass.length > maxLengthPass) {
+								alert("Password must be at most " + maxLengthPass + " characters long.");
+								return false;
+							}
+							if (newPass !== conPass) {
+								alert("New Password and Confirm Password must match.");
+								return false;
+							}
+							$.ajax({
+										type : "POST",
+										cache : false,
+										url : "./changePassword?oldpass=" + newPass + "&newpass=" + conPass,
+										success : function(data) {
+											$('#changepassword1').modal('hide');
+											$('#myModalpopup2').modal("toggle");
+											$('#myModalpopup2 .modal-body').text(data);
+										},
+										error : function(xhr, status, error) {
+											alert("Error changing password. Please try again.");
+										}
+							});
+						},
+						error : function(xhr, status, error) {
+							alert("Failed to retrieve security data. Please try again.");
+						}
+			});
+		}
+
+		$(document).ready(function() {
+			$(window).keydown(function(event) {
+				if (event.keyCode == 13) {
+					event.preventDefault();
+					return false;
+				}
+			});
+		});
+
+		$(function() {
+			$("#currentDates").datepicker({
+						dateFormat : "dd-mm-yy",
+						changeMonth : true,
+						numberOfMonths : 1,
+						gotoCurrent : true
+			});
+		});
+
+		$(document).ready(function() {
+			var countsuccess = /*[[${countsuccess}]]*/0;
+			var countfailure = /*[[${countfailure}]]*/0;
+			var countinitiated = /*[[${countinitiated}]]*/0;
+			var countzero = /*[[${countzero}]]*/0;
+
+			// Check if countsuccess, countfailure, and countinitiated are all zero
+			if (countsuccess === 0 && countfailure === 0 && countinitiated === 0) {
+				// Include countzero in the pie chart
+				$("#INC1").sparkline([ countsuccess, countfailure, countinitiated, countzero ], {
+							type : "pie",
+							width : "210",
+							height : "210",
+							sliceColors : [ "#77b179", "#ff8f9f", "#8a929a", "#f7bb86" ]
+				});
+			} else {
+				// Exclude countzero from the pie chart
+				$("#INC1").sparkline([ countsuccess, countfailure, countinitiated ], {
+							type : "pie",
+							width : "210",
+							height : "210",
+							sliceColors : [ "#77b179", "#ff8f9f", "#8a929a" ]
+				});
+			}
+
+			var resizeTimeout;
+			$(window).resize(function() {
+				clearTimeout(resizeTimeout);
+				resizeTimeout = setTimeout(function() {
+				}, 300);
+			});
+		});
+
+		function openModal() {
+			var modal = document.getElementById("myModalpopup");
+			var flag = document.getElementById("flag").value;
+			if (flag === "N") {
+				modal.style.display = "block";
+			} else {
+				modal.style.display = "none";
+			}
+		}
+
+		window.onload = function() {
+			openModal();
+		};
+
+		function showError(element, message) {
+			var errorSpan = $('<span class="error-message"></span>').text(message);
+			errorSpan.css({
+						'color' : 'red',
+						'font-size' : '13px',
+						'margin-top' : '10px',
+						'margin-left' : '250px'
+			});
+			element.next('.error-message').remove();
+			element.after(errorSpan);
+		}
+
+		function hideError(element) {
+			element.next('.error-message').remove();
+		}
+
+		function backToLoginPage() {
+			window.location.href = './login';
+		}
+
+		/*]]>*/
+	</script>
+
+</body>
+</html>

@@ -1,0 +1,348 @@
+<!DOCTYPE html SYSTEM "http://www.thymeleaf.org/dtd/xhtml1-strict-thymeleaf-4.dtd">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" th:fragment="summary">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<link rel="stylesheet" type="text/css" href="/webjars/bootstrap/4.3.1/css/bootstrap.min.css" th:href="@{/webjars/bootstrap/4.3.1/css/bootstrap.min.css}">
+<link rel="stylesheet" type="text/css" href="/webjars/font-awesome/5.9.0/css/all.min.css" th:href="@{/webjars/font-awesome/5.9.0/css/all.min.css}">
+<link rel="stylesheet" type="text/css" href="/webjars/jquery-ui/1.12.1/jquery-ui.min.css" th:href="@{/webjars/jquery-ui/1.12.1/jquery-ui.min.css}">
+<link rel="stylesheet" type="text/css" href="/webjars/datatables/1.10.19/css/jquery.dataTables.min.css" th:href="@{/webjars/datatables/1.10.19/css/jquery.dataTables.min.css}">
+
+<script src="/webjars/bootstrap/4.3.1/js/bootstrap.min.js" th:src="@{/webjars/bootstrap/4.3.1/js/bootstrap.min.js}"></script>
+<script src="/webjars/popper.js/1.14.7/umd/popper.min.js" th:src="@{/webjars/popper.js/1.14.7/umd/popper.min.js}"></script>
+<script src="/webjars/jquery/3.4.1/jquery.min.js" th:src="@{/webjars/jquery/3.4.1/jquery.min.js}"></script>
+<script src="/webjars/jquery-ui/1.12.1/jquery-ui.min.js" th:src="@{/webjars/jquery-ui/1.12.1/jquery-ui.min.js}"></script>
+<script src="/webjars/jquery-form/4.2.2/jquery.form.min.js" th:src="@{/webjars/jquery-form/4.2.2/jquery.form.min.js}"></script>
+<script src="/webjars/jquery-validation/1.19.0/jquery.validate.min.js" th:src="@{/webjars/jquery-validation/1.19.0/jquery.validate.min.js}"></script>
+<script src="/webjars/datatables/1.10.19/js/jquery.dataTables.min.js" th:src="@{/webjars/datatables/1.10.19/js/jquery.dataTables.min.js}"></script>
+<script src="/webjars/datatables/1.10.19/js/dataTables.bootstrap4.min.js" th:src="@{/webjars/datatables/1.10.19/js/dataTables.bootstrap4.min.js}"></script>
+<script src="js/bootstrap411.js"></script>
+
+<style>
+table th {
+	color: white;
+	background-color: #2e455deb;
+	font-size: small;
+}
+
+table td {
+	font-size: small;
+	background-color: #f8f7ff;
+}
+
+table.dataTable thead th, table.dataTable tfoot th {
+	font-weight: normal;
+}
+
+table.table .thead-light th {
+	font-size: 13px;
+	border-color: #d4d7da;
+}
+
+.container-manager {
+	padding-right: 43px;
+	padding-left: 15px;
+	margin-right: auto;
+	margin-left: 18.3%;
+	margin-top: 80px;
+}
+
+.dataTables_empty {
+	color: #be3232;
+}
+
+input, select {
+	height: 35px !important;
+	color: black;
+}
+
+.dropdown-menu {
+	min-width: 9rem !important;
+}
+</style>
+</head>
+
+<script>
+	function transactionList() {
+		if ($("#Requirements").valid()) {
+			var unit_id = document.getElementById("unit_id").value;
+			var tran_type = document.getElementById("transaction_type").value;
+			var from_date = document.getElementById("Fromdate").value;
+			var to_date = document.getElementById("Todate").value;
+
+			tran_type = encodeURIComponent(tran_type);
+			from_date = encodeURIComponent(from_date);
+			to_date = encodeURIComponent(to_date);
+
+			var url = "./transaction?formmode=tranList&tran_type=" + tran_type + "&from_date=" + from_date + "&to_date=" + to_date;
+			if (unit_id && unit_id.trim() !== "") {
+				unit_id = encodeURIComponent(unit_id);
+				url += "&unit_id=" + unit_id;
+			}
+			location.href = url;
+		}
+	}
+
+	$(function() {
+		$("#Fromdate").datepicker({
+					changeMonth : true,
+					changeYear : true,
+					dateFormat : "dd-M-yy",
+					maxDate : 0,
+					onSelect : function(selected) {
+						var dt = $(this).datepicker('getDate');
+						dt.setDate(dt.getDate());
+						$("#Todate").datepicker("option", "minDate", dt);
+
+					}
+		});
+
+		$("#Todate").datepicker({
+					changeMonth : true,
+					changeYear : true,
+					maxDate : 0,
+					dateFormat : "dd-M-yy",
+					onSelect : function(selected) {
+						var dt = new Date(selected);
+						dt.setDate(dt.getDate() - 1);
+						var Fromdate = document.getElementById("Fromdate").value;
+						var Todate = document.getElementById("Todate").value;
+						if (Fromdate == "") {
+							alert("Enter From date");
+						}
+					}
+		});
+	});
+
+	function home() {
+		location.href = './IPSDashboard';
+	}
+
+	function back() {
+		window.history.back();
+	}
+
+	$(document).ready(function() {
+		$('#usertable').DataTable({
+					"destroy" : true,
+					"scrollCollapse" : true,
+					"paging" : true,
+					"autoWidth" : false,
+					"ordering" : true,
+					"oLanguage" : {
+								"sSearch" : "",
+								"sSearchPlaceholder" : "Search Here"
+					},
+					"searching" : true,
+					"pageLength" : 10,
+					"lengthChange" : false,
+		});
+	});
+
+	function downloadPdfExcel(button) {
+	    var txnCount = document.getElementById("txnCount").value;
+	    if (txnCount == 0) {
+	        $('#myModalpopup1').modal("toggle");
+	        $('#myModalpopup1 .modal-body').text("No data available for the selected dates.");
+	        return;
+	    }
+	    var from_date = document.getElementById("from_date").value;
+	    var to_date = document.getElementById("to_date").value;
+	    var unit_id = document.getElementById("unit_id").value;
+	    var tran_type = document.getElementById("tran_type").value;
+	    var filetype = button.getAttribute("data-fileType");
+	    var downloadUrl = `./DownloadTxnReport?from_date=${encodeURIComponent(from_date)}&to_date=${encodeURIComponent(to_date)}&unit_id=${encodeURIComponent(unit_id)}&tran_type=${encodeURIComponent(tran_type)}&filetype=${encodeURIComponent(filetype)}`;
+	    $.ajax({
+	        url: downloadUrl,
+	        type: 'GET',
+	        xhrFields: {
+	            responseType: 'blob'
+	        },
+	        success: function (data, status, xhr) {
+	            var contentDisposition = xhr.getResponseHeader('Content-Disposition');
+	            var contentType = xhr.getResponseHeader('Content-Type');
+	            if (contentDisposition) {
+	                var fileName = contentDisposition.split('filename=')[1].split(';')[0].replace(/"/g, '');
+	                var blob = new Blob([data], { type: contentType });
+	                var downloadLink = document.createElement('a');
+	                downloadLink.href = window.URL.createObjectURL(blob);
+	                downloadLink.download = fileName;
+	                document.body.appendChild(downloadLink);
+	                downloadLink.click();
+	                document.body.removeChild(downloadLink);
+	            } else {
+	                $('#myModalpopup1').modal("toggle");
+	                $('#myModalpopup1 .modal-body').text("Failed to retrieve the file. Please try again.");
+	            }
+	        },
+	        error: function () {
+	            $('#myModalpopup1').modal("toggle");
+	            $('#myModalpopup1 .modal-body').text("An error occurred while downloading the file.");
+	        }
+	    });
+	}
+
+</script>
+<title>IPSAdmin</title>
+
+<body>
+	<div th:insert="MMenupage :: header"></div>
+
+	<div class="container-manager">
+		<div class="content pt-3" th:if="${formmode}=='list'">
+			<div class="card">
+				<div class="card-header">
+					<h4 style="color: white; font-size: 1.5rem;">Transaction Reports</h4>
+				</div>
+				<div class="card-body">
+					<form action="#" method="POST" autocomplete="off" id="Requirements">
+						<div class="row formline">
+							<div class="col-sm-1"></div>
+							<div class="col-sm-2">
+								<label for="CUSTID">Merchant ID</label>
+							</div>
+							<div class="col-sm-2">
+								<input type="text" id="merchant_id" th:value="${merchant_id}" class="form-control form-control-sm" name="merchant_id" autocomplete="off" readonly />
+							</div>
+							<div class="col-sm-1"></div>
+							<div class="col-sm-2">
+								<label for="custName">Merchant Name</label>
+							</div>
+							<div class="col-sm-2">
+								<input type="text" id="merchant_name" name="merchant_name" class="form-control form-control-sm" th:value="${merchant_name}" autocomplete="off" required readonly />
+							</div>
+						</div>
+						<br>
+						<div class="row formline">
+							<div class="col-sm-1"></div>
+							<div class="col-sm-2">
+								<label for="CUSTID">From Date <span style="color: red; font-size: 20px;"> *</span>
+								</label>
+							</div>
+							<div class="col-sm-2">
+								<input type="text" id="Fromdate" th:value="${Fromdate}" class="form-control form-control-sm" name="cust_id" autocomplete="off" required readonly />
+							</div>
+							<div class="col-sm-1"></div>
+							<div class="col-sm-2">
+								<label for="custName">To Date <span style="color: red; font-size: 20px;"> *</span></label>
+							</div>
+							<div class="col-sm-2">
+								<input type="text" id="Todate" name="cust_name" onblur="running()" th:value="${Todate}" class="form-control form-control-sm" autocomplete="off" required readonly />
+							</div>
+						</div>
+						<br>
+						<div class="row formline">
+							<div class="col-sm-1"></div>
+							<div class="col-sm-2">
+								<label for="CUSTID">Transaction Type <span style="color: red; font-size: 20px;"> *</span></label>
+							</div>
+							<div class="col-sm-2">
+								<select id="transaction_type" name="transaction_type" class="form-control form-control-sm w-100" required>
+									<option></option>
+									<option value="ALL">All Transactions</option>
+									<option value="SUCCESS">Success Transactions</option>
+									<option value="FAILURE">Failure Transactions</option>
+								</select>
+							</div>
+							<div class="col-sm-1"></div>
+							<div class="col-sm-2">
+								<label for="custName">Unit ID</label>
+							</div>
+							<div class="col-sm-2">
+								<select id="unit_id" name="unit_id" class="form-control form-control-sm w-100">
+									<option value=""></option>
+									<option th:each="unit : ${unit_ids}" th:value="${unit}" th:text="${unit}"></option>
+								</select>
+							</div>
+						</div>
+					</form>
+				</div>
+
+				<div class="card-footer text-center">
+					<button type="button" class="btn btn-xs btn-primary" id="btnHome" onclick="home();">Home</button>
+					<button type="button" class="btn btn-xs btn-primary" id="btnHome" onclick="transactionList();">Submit</button>
+					<button type="button" class="btn btn-xs btn-primary" id="btnBack" onclick="back();">Back</button>
+				</div>
+			</div>
+		</div>
+
+		<div class="content pt-3" th:if="${formmode}=='tranList'">
+			<div class="card">
+				<div class="card-header">
+					<div class="d-flex justify-content-between align-items-center">
+						<h4 style="color: white; font-size: 1.5rem;">Transaction Reports</h4>
+						<div class="btn-group nav-buttons">
+							<div class="dropdown">
+								<button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" title="Action"
+									style="line-height: 0.7; font-size: 15px; color: #162b75; font-weight: 700; background: white; padding: 10px;" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Download</button>
+								<div class="dropdown-menu" aria-labelledby="dropdownMenuButton" title="Modify" style="line-height: 0.7; background-color: #e3e3e4;">
+									<a class="dropdown-item" style="cursor: pointer; height: 20px; width: 50px; background: #e3e3e4; border-radius: .20rem; padding: 12px 10px; font-size: 15px; color: #162b75; font-weight: 700;"
+										th:attr="data-fileType='pdf'" onclick="downloadPdfExcel(this);">PDF</a>
+									<div class="dropdown-divider" style="height: 2px; line-height: 0.7;"></div>
+									<a class="dropdown-item" th:attr="data-fileType='excel'"
+										style="cursor: pointer; height: 20px; width: 50px; background: #e3e3e4; border-radius: .20rem; padding: 2px 0px 0px 10px; font-size: 15px; color: #162b75; font-weight: 700;" onclick="downloadPdfExcel(this);"
+										title="Verify">Excel</a>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="card-body p-0">
+					<input type="text" id="from_date" th:value="${from_date}" hidden="true" /> <input type="text" id="to_date" th:value="${to_date}" hidden="true" /> <input type="text" id="tran_type" th:value="${tran_type}"
+						hidden="true" /> <input type="text" id="unit_id" th:value="${unit_id}" hidden="true" /> <input type="text" id="txnCount" th:value="${txnCount}" hidden="true" />
+
+					<table class="table table-striped table-bordered table-hover table-sm" id="usertable">
+						<thead>
+							<tr>
+								<th>Tran Date</th>
+								<th>Ref ID</th>
+								<th>Bill Number</th>
+								<th>Customer Account</th>
+								<th>Customer Account Name</th>
+								<th>Currency</th>
+								<th>Amount</th>
+								<th>Status</th>
+								<th>Reversal Remarks</th>
+							</tr>
+						</thead>
+						<tbody id="transaction_data">
+							<tr th:each="details:${txns}">
+								<td th:text="${details?.tran_date !=null ? #dates.format(details.tran_date,'dd-MM-yyy') :''}"></td>
+
+								<td th:text="${details?.master_ref_id != null ? details.master_ref_id.toUpperCase() : ''}"></td>
+								<td th:text="${details?.merchant_bill_number != null ? details.merchant_bill_number.toUpperCase() : ''}"></td>
+								<td th:text="${details?.ipsx_account != null ? details.ipsx_account.substring(0, 4) + 'XXXXXXX' + details.ipsx_account.substring(details.ipsx_account.length() - 3) : ''}"></td>
+								<td th:text="${details?.ipsx_account_name != null ? details.ipsx_account_name.toUpperCase() : ''}"></td>
+								<td th:text="${details?.tran_currency != null ? details.tran_currency.toUpperCase() : ''}"></td>
+								<td th:text="${details?.tran_amount != null ? #numbers.formatDecimal(details.tran_amount, 0, 'COMMA', 2, 'POINT') : ''}"></td>
+								<td th:text="${details?.tran_status != null ? details.tran_status.toUpperCase() : ''}"></td>
+								<td th:text="${details?.reversal_remarks != null ? details.reversal_remarks.toUpperCase() : ''}"></td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+				<div class="card-footer text-center">
+					<button type="button" class="btn btn-sm commonBtnStyle mr-2" data-dismiss="modal" onclick="home();">Home</button>
+					<button type="button" class="btn btn-sm commonBtnStyle" data-dismiss="modal" onclick="back();">Back</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Model Box -->
+
+	<div class="modal fade" id="myModalpopup1" data-backdrop="static" data-keyboard="false" style="background: #000000b0;">
+		<div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+			<div class="modal-content">
+				<h3 class="text-center p-2 text-white font-weight-bold" style="background: #f26223;">BANK OF BARODA</h3>
+				<h4 class="modal-body text-center font-weight-bold" style="color: black !important; font-size: 19px"></h4>
+				<div class="text-center">
+					<button type="button" class="btn mb-2" style="width: 16%; background: #f26223; font-size: 17px;" data-dismiss="modal">Close</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+</body>
+</html>
