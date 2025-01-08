@@ -39,6 +39,7 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.web.client.RestTemplate;
 
+import com.bornfire.entity.BIPS_Mer_User_Management_Entity;
 import com.bornfire.entity.BIPS_Password_Management_Entity;
 import com.bornfire.services.BankAndBranchMasterServices;
 
@@ -79,33 +80,60 @@ public class IPSWebSecurity extends WebSecurityConfigurerAdapter {
 
 		http.csrf().disable();
 	}
-
 	@Bean
 	public AuthenticationProvider authenticationProvider() {
-		DaoAuthenticationProvider ap = new DaoAuthenticationProvider() {
-			@Override
-			public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-				String userid = authentication.getName();
-				String password = authentication.getCredentials().toString();
-				BIPS_Password_Management_Entity bipsUserOptional = new BIPS_Password_Management_Entity();
-				try {
-					// bipsUserOptional = bIPS_PasswordManagement_Repo.findById(userid);
-					String url = env.getProperty("ipsx.url") + "api/bipsUserForAuthentication?" + "userid=" + userid;
-					bipsUserOptional = restTemplate.getForObject(url, BIPS_Password_Management_Entity.class);
-				} catch (Exception e) {
-					throw new LockedException("Server Problem.Please Contact Administrator");
-				}
-				if (Objects.nonNull(bipsUserOptional)) {
-					return authenticateBipsUser(bipsUserOptional, password);
-				} else {
-					throw new UsernameNotFoundException("User not found");
-				}
-			}
-		};
-		ap.setHideUserNotFoundExceptions(false);
-		ap.setUserDetailsService(userDetailsService());
-		return ap;
+	    DaoAuthenticationProvider ap = new DaoAuthenticationProvider() {
+	        @Override
+	        public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+	            String userid = authentication.getName();
+	            String password = authentication.getCredentials().toString();
+
+	            BIPS_Password_Management_Entity bipsUserOptional = null;
+	            BIPS_Mer_User_Management_Entity bipsUserMan = null;
+
+	            // Fetch data for BIPS_Password_Management_Entity
+	            try {
+	                String urlPassword = env.getProperty("ipsx.url") + "api/bipsUserForAuthentication?userid=" + userid;
+	                bipsUserOptional = restTemplate.getForObject(urlPassword, BIPS_Password_Management_Entity.class);
+	                // Debugging logs to check if data is fetched
+	                System.out.println("BIPS_Password_Management_Entity: " + bipsUserOptional);
+	            } catch (Exception e) {
+	                // Only catch network or parsing issues, not null data
+	                System.out.println("Error fetching from BIPS_Password_Management_Entity: " + e.getMessage());
+	            }
+
+	            // Fetch data for BIPS_Mer_User_Management_Entity
+	            try {
+	                String urlUserMan = env.getProperty("ipsx.url") + "api/bipsUserManageForAuthentication?userid=" + userid;
+	                bipsUserMan = restTemplate.getForObject(urlUserMan, BIPS_Mer_User_Management_Entity.class);
+	                // Debugging logs to check if data is fetched
+	                System.out.println("BIPS_Mer_User_Management_Entity: " + bipsUserMan);
+	            } catch (Exception e) {
+	                // Only catch network or parsing issues, not null data
+	                System.out.println("Error fetching from BIPS_Mer_User_Management_Entity: " + e.getMessage());
+	            }
+
+	            // Check in BIPS_Password_Management_Entity table
+	            if (bipsUserOptional != null) {
+	                return authenticateBipsUser(bipsUserOptional, password);
+	            }
+
+	            // Check in BIPS_Mer_User_Management_Entity table
+	            if (bipsUserMan != null) {
+	                return authenticateBipsUserMan(bipsUserMan, password);
+	            }
+
+	            // If both entities are null, return user not found exception
+	            throw new UsernameNotFoundException("User not found in both tables");
+	        }
+	    };
+
+	    ap.setHideUserNotFoundExceptions(false);
+	    ap.setUserDetailsService(userDetailsService());
+	    return ap;
 	}
+
+
 
 	private Authentication authenticateBipsUser(BIPS_Password_Management_Entity bipsUser, String password) {
 		this.passwordvaluemain = password;
@@ -132,23 +160,83 @@ public class IPSWebSecurity extends WebSecurityConfigurerAdapter {
 					Collections.emptyList());
 		}
 	}
+	private Authentication authenticateBipsUserMan(BIPS_Mer_User_Management_Entity bipsUser, String password) {
+		this.passwordvaluemain = password;
+		if (!bipsUser.isAccountNonExpired1()) {
+			throw new AccountExpiredException("Account Expired");
+		} else if (!bipsUser.isCredentialsNonExpired1()) {
+			throw new CredentialsExpiredException("Credentials Expired");
+		} else if (!bipsUser.ispasswordnotexpiry()) {
+			throw new LockedException("Password Expired");
+		} else if (!bipsUser.isAccountNonLocked()) {
+			throw new LockedException("Account Locked");
+		} else if (!bipsUser.isUserStatus()) {
+			throw new LockedException("Already in Use");
+		} else {
+			try {
+				if (!PasswordEncryption.validatePassword(password, bipsUser.getPassword1())) {
+					handleInvalidUsers(bipsUser);
+				}
+			} catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+				e.printStackTrace();
+				throw new AuthenticationServiceException("Authentication error", e);
+			}
+			return new UsernamePasswordAuthenticationToken(bipsUser.getUser_id(), password,
+					Collections.emptyList());
+		}
+	} 
 
+	/*
+	 * @Bean
+	 * 
+	 * @Override public UserDetailsService userDetailsService() { return new
+	 * UserDetailsService() {
+	 * 
+	 * @Override public UserDetails loadUserByUsername(String username) throws
+	 * UsernameNotFoundException { BIPS_Password_Management_Entity up1 = new
+	 * BIPS_Password_Management_Entity(); String url = env.getProperty("ipsx.url") +
+	 * "api/bipsUserForAuthentication?" + "userid=" + username; up1 =
+	 * restTemplate.getForObject(url, BIPS_Password_Management_Entity.class); if
+	 * (Objects.nonNull(up1)) { return (UserDetails) up1; } else { return
+	 * (UserDetails) new BIPS_Password_Management_Entity(); }
+	 * 
+	 * BIPS_Mer_User_Management_Entity up1user = new
+	 * BIPS_Mer_User_Management_Entity(); String urluser =
+	 * env.getProperty("ipsx.url") + "api/bipsUserManageForAuthentication?" +
+	 * "userid=" + username; up1user = restTemplate.getForObject(url,
+	 * BIPS_Mer_User_Management_Entity.class); if (Objects.nonNull(up1user)) {
+	 * return (UserDetails) up1user; } else { return (UserDetails) new
+	 * BIPS_Mer_User_Management_Entity(); } } }; }
+	 */
 	@Bean
 	@Override
 	public UserDetailsService userDetailsService() {
-		return new UserDetailsService() {
-			@Override
-			public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-				BIPS_Password_Management_Entity up1 = new BIPS_Password_Management_Entity();
-				String url = env.getProperty("ipsx.url") + "api/bipsUserForAuthentication?" + "userid=" + username;
-				up1 = restTemplate.getForObject(url, BIPS_Password_Management_Entity.class);
-				if (Objects.nonNull(up1)) {
-					return (UserDetails) up1;
-				} else {
-					return (UserDetails) new BIPS_Password_Management_Entity();
-				}
-			}
-		};
+	    return new UserDetailsService() {
+	        @Override
+	        public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+	            BIPS_Password_Management_Entity up1 = null;
+	            BIPS_Mer_User_Management_Entity up1user = null;
+	            String url = env.getProperty("ipsx.url") + "api/bipsUserForAuthentication?userid=" + username;
+	            String urluser = env.getProperty("ipsx.url") + "api/bipsUserManageForAuthentication?" + "userid=" + username;
+	            try {
+	                // Fetching the user details
+	                up1 = restTemplate.getForObject(url, BIPS_Password_Management_Entity.class);
+	                up1user = restTemplate.getForObject(urluser, BIPS_Mer_User_Management_Entity.class);
+	            } catch (Exception e) {
+	                throw new UsernameNotFoundException("User not found", e);
+	            }
+
+	            if (up1 != null) {
+	                // Assuming up1 implements UserDetails or can be converted into a UserDetails object
+	                return (UserDetails) up1; 
+	            } else if (up1user != null) {
+	                // Assuming up1user implements UserDetails or can be converted into a UserDetails object
+	                return (UserDetails) up1user; 
+	            } else {
+	                throw new UsernameNotFoundException("User not found");
+	            }
+	        }
+	    };
 	}
 
 	@Bean
@@ -178,6 +266,11 @@ public class IPSWebSecurity extends WebSecurityConfigurerAdapter {
 						+ authentication.getName();
 				BIPS_Password_Management_Entity user1 = restTemplate.getForObject(url,
 						BIPS_Password_Management_Entity.class);
+				
+				String url1 = env.getProperty("ipsx.url") + "api/bipsUserManageForAuthentication?" + "userid="
+						+ authentication.getName();
+				BIPS_Mer_User_Management_Entity user2 = restTemplate.getForObject(url1,
+						BIPS_Mer_User_Management_Entity.class);
 
 				if (Objects.nonNull(user1)) {
 					request.getSession().setAttribute("USERID", user1.getMerchant_rep_id());
@@ -190,7 +283,22 @@ public class IPSWebSecurity extends WebSecurityConfigurerAdapter {
 					request.getSession().setAttribute("USERNAME", user1.getMer_representative_name());
 					request.getSession().setAttribute("UNITID", user1.getUnit_id());
 					request.getSession().setAttribute("UNITNAME", user1.getUnit_name());
+					request.getSession().setAttribute("USERCATEGORY", user1.getUser_category());
 					request.getSession().setAttribute("acces", user1.getPwlog_flg());
+					response.sendRedirect("IPSDashboard");
+				}else if (Objects.nonNull(user2)) {
+					request.getSession().setAttribute("USERID", user2.getUser_id());
+					request.getSession().setAttribute("USERID1", user2.getUnit_id_u());
+					request.getSession().setAttribute("MER_USER_ID", user2.getMerchant_user_id());
+					request.getSession().setAttribute("MER_USER_NAME", user2.getMerchant_corporate_name());
+					request.getSession().setAttribute("MERUNIT", user2.getUnit_id_u());
+					request.getSession().setAttribute("unitidacess", user2.getUnit_id_u());
+					request.getSession().setAttribute("ROLEID", "MER");
+					request.getSession().setAttribute("USERNAME", user2.getUser_name());
+					request.getSession().setAttribute("UNITID", user2.getUnit_id_u());
+					request.getSession().setAttribute("UNITNAME", user2.getUnit_name_u());
+					request.getSession().setAttribute("USERCATEGORY", user2.getUser_category());
+					//request.getSession().setAttribute("acces", user1.getPwlog_flg());
 					response.sendRedirect("IPSDashboard");
 				} else {
 					response.sendRedirect("login?error=" + "No Record Found");
@@ -198,7 +306,7 @@ public class IPSWebSecurity extends WebSecurityConfigurerAdapter {
 			}
 		};
 	}
-
+	
 	@Bean
 	public LogoutSuccessHandler ipsLogoutSuccessHandler() {
 		return new LogoutSuccessHandler() {
@@ -216,10 +324,23 @@ public class IPSWebSecurity extends WebSecurityConfigurerAdapter {
 						+ authentication.getName();
 				up1 = restTemplate.getForObject(url, BIPS_Password_Management_Entity.class);
 
+				
 				String url1 = env.getProperty("ipsx.url") + "api/updateLoginStatus?" + "userid="
 						+ up1.getMerchant_rep_id();
 				restTemplate.getForObject(url1, BIPS_Password_Management_Entity.class);
 				response.sendRedirect("login?logout");
+				
+				//for user man
+				BIPS_Mer_User_Management_Entity up_user = new BIPS_Mer_User_Management_Entity();
+				String url_user = env.getProperty("ipsx.url") + "api/bipsUserManageForAuthentication?" + "userid="
+						+ authentication.getName();
+				up_user = restTemplate.getForObject(url_user, BIPS_Mer_User_Management_Entity.class);
+				
+				String url_user1 = env.getProperty("ipsx.url") + "api/updateLoginStatusUserManage?" + "userid="
+						+ up_user.getUser_id();
+				restTemplate.getForObject(url_user1, BIPS_Mer_User_Management_Entity.class);
+				response.sendRedirect("login?logout");
+				
 			}
 		};
 	}
@@ -228,6 +349,14 @@ public class IPSWebSecurity extends WebSecurityConfigurerAdapter {
 		logger.info("Passing Userid: " + bipsPasswordManagementEntity.getMerchant_rep_id());
 		String url = env.getProperty("ipsx.url") + "api/updateLoginLockedFlg?merchant_rep_id="
 				+ bipsPasswordManagementEntity.getMerchant_rep_id();
+		restTemplate.getForEntity(url, String.class);
+		throw new BadCredentialsException("Authentication failed");
+	}
+	
+	public void handleInvalidUsers(BIPS_Mer_User_Management_Entity bIPS_Mer_User_Management_Entity) {
+		logger.info("Passing Userid: " + bIPS_Mer_User_Management_Entity.getUser_id());
+		String url = env.getProperty("ipsx.url") + "api/updateLoginLockedFlgUserManage?merchant_rep_id="
+				+ bIPS_Mer_User_Management_Entity.getUser_id();
 		restTemplate.getForEntity(url, String.class);
 		throw new BadCredentialsException("Authentication failed");
 	}

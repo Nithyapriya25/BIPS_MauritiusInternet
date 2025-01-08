@@ -415,6 +415,53 @@ public class BIPS_Mer_User_Management_Entity {
 		this.photo = photo;
 		this.authentication_flg = authentication_flg;
 	}
+
+	public boolean isAccountNonExpired1() {
+		if (this.getAccount_expiry_date1().after(new Date())) {
+			return true;
+		} else {
+			return false;
+		}
+
+	}
+
+	public boolean ispasswordnotexpiry() {
+		Date expiryDate = getPassword_expiry_date1();
+		Date currentDate = new Date();
+
+		if (expiryDate.after(currentDate)) {
+			return true; // Password has expired
+		} else {
+			return false; // Password has not expired
+		}
+	}
+
+	public boolean isUserStatus() {
+		String userStatus = getUser_status1();
+		String login = getLogin_status1();
+		if ("ACTIVE".equals(userStatus) && "N".equals(login)) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	public boolean isAccountNonLocked() {
+		boolean status = true;
+		if (this.getUser_locked_flg().equals("Y")) {
+			status = false;
+		} else {
+			status = true;
+		}
+
+		return status;
+	}
+
+	public boolean isCredentialsNonExpired1() {
+
+		return true;
+
+	}
 	public BIPS_Mer_User_Management_Entity() {
 		super();
 		// TODO Auto-generated constructor stub
