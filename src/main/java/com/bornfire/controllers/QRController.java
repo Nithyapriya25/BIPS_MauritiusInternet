@@ -76,7 +76,7 @@ public class QRController {
 			String imageAsBase64;
 			if (merchantQRResponse.getStatusCode() == HttpStatus.OK) {
 				QrImg = merchantQRResponse.getBody().getBase64QR();
-				imageAsBase64 = "data:image/png;base64," + QrImg;
+				imageAsBase64 = QrImg;
 			} else {
 				if (merchantQRResponse.getStatusCode() == HttpStatus.BAD_REQUEST) {
 					imageAsBase64 = merchantQRResponse.getBody().getError().toString() + ":"
@@ -143,14 +143,14 @@ public class QRController {
 		merchantQRgenerator.setCity(ms.getMerchant_city());
 		merchantQRgenerator.setCountry("MU");
 		merchantQRgenerator.setZip_code(ms.getPincode());
-		merchantQRgenerator.setMobile(null);
-		merchantQRgenerator.setLoyalty_number(null);
-		merchantQRgenerator.setStore_label(null);
-		merchantQRgenerator.setCustomer_label(null);
+		merchantQRgenerator.setMobile(ms.getMerchant_mob_no());
+		merchantQRgenerator.setLoyalty_number(ms.getLoyalty_number());
+		merchantQRgenerator.setStore_label(ms.getStore_label());
+		merchantQRgenerator.setCustomer_label(ms.getCustomer_label());
 		merchantQRgenerator.setReference_label(sequence.generateMerchantQRPID() + sequence.getRandom4Digit());
-		merchantQRgenerator.setTerminal_label(null);
-		merchantQRgenerator.setPurpose_of_tran(null);
-		merchantQRgenerator.setAdditional_details(null);
+		merchantQRgenerator.setTerminal_label(ms.getTerminal_label());
+		merchantQRgenerator.setPurpose_of_tran(ms.getPurpose_of_tran());
+		merchantQRgenerator.setAdditional_details(ms.getAdd_details_req());
 		merchantQRgenerator.setTransaction_amt(tran_amt);
 		merchantQRgenerator.setBill_number(bill_num);
 		merchantQRgenerator.setCustomer_label(ms.getCustomer_label());
@@ -172,7 +172,7 @@ public class QRController {
 			} else {
 				imageAsBase64 = merchantQRResponse.getBody().getBase64QR();
 				responseMap.put("success", true);
-				responseMap.put("qrCodeUrl", "data:image/png;base64," + imageAsBase64);
+				responseMap.put("qrCodeUrl", imageAsBase64);
 			}
 		} else {
 			responseMap.put("success", false);

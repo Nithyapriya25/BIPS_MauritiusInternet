@@ -18,6 +18,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
@@ -63,16 +64,17 @@ public class QRCODEServices {
 		httpHeaders.set("PSU-IP-Address", InetAddress.getLocalHost().getHostAddress());
 		httpHeaders.set("PSU-Channel", "BIPS");
 		httpHeaders.set("Merchant_ID", merchantId);
-		httpHeaders.set("Device_ID", deviceid());
-		httpHeaders.set("Reference_Number", refNumber);
-		httpHeaders.set("User-ID", userid);
-		httpHeaders.set("Unit-ID", UNITID);
+		//httpHeaders.set("Device_ID", deviceid());
+		//httpHeaders.set("Reference_Number", refNumber);
+		//httpHeaders.set("User-ID", userid);
+		//httpHeaders.set("Unit-ID", UNITID);
 		httpHeaders.set("PSU-Resv-Field2", null);
 
+		System.out.println("MMEERR ID");
 		HttpEntity<CIMMerchantQRcodeRequest> entity = new HttpEntity<>(httpHeaders);
 		ResponseEntity<cimMerchantQRcodeResponse> response = null;
 		try {
-			response = restTemplate.postForEntity(env.getProperty("ipsx.url") + "/api/ws/StaticMaucas", entity,
+			response = restTemplate.postForEntity(env.getProperty("ipsx.url") + "/api/ws/StaticMaucasMur", entity,
 					cimMerchantQRcodeResponse.class);
 			if (response.getStatusCode() == HttpStatus.OK) {
 				return new ResponseEntity<>(response.getBody(), HttpStatus.OK);
@@ -106,9 +108,18 @@ public class QRCODEServices {
 		httpHeaders.set("PSU-IP-Address", InetAddress.getLocalHost().getHostAddress());
 		httpHeaders.set("PSU-Channel", "BIPS");
 		httpHeaders.set("Merchant_ID", merchantQRgenerator.getMerchant_id());
-		httpHeaders.set("User-ID", USERID);
-		httpHeaders.set("Unit-ID", UNITID);
-		httpHeaders.set("Device-ID", "PC");
+		httpHeaders.set("PSU-Resv-Field2", "RESVFIELD");
+		httpHeaders.set("Transaction_Amt", "100");
+		httpHeaders.set("Mobile_Number", "9028909890");
+		httpHeaders.set("Loyality_Number", "01");
+		httpHeaders.set("Store_Label", "storelabel");
+		httpHeaders.set("Customer_Label", "10");
+		httpHeaders.set("Reference_Label", "20");
+		httpHeaders.set("Terminal_Label", "10");
+		httpHeaders.set("Purpose_Of_Tran", "newtran");
+		httpHeaders.set("Additonal_Detail", "01");
+		httpHeaders.set("Bill_Number", "01");
+		
 		// httpHeaders.set("Reference_Number", sequence.generateMerchantQRPID() +
 		// sequence.getRandom4Digit());
 
@@ -131,7 +142,7 @@ public class QRCODEServices {
 		HttpEntity<CimDynamicMaucasRequest> entity = new HttpEntity<>(cimDynamicMaucasRequest, httpHeaders);
 		ResponseEntity<cimMerchantQRcodeResponse> response = null;
 		try {
-			response = restTemplate.postForEntity(env.getProperty("ipsx.url") + "/api/ws/DynamicMaucas", entity,
+			response = restTemplate.postForEntity(env.getProperty("ipsx.url") + "/api/ws/DynamicMaucasMur", entity,
 					cimMerchantQRcodeResponse.class);
 			if (response.getStatusCode() == HttpStatus.OK) {
 				System.out.println("data-->OK");

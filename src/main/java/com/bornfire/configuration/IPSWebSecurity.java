@@ -85,8 +85,11 @@ public class IPSWebSecurity extends WebSecurityConfigurerAdapter {
 	    DaoAuthenticationProvider ap = new DaoAuthenticationProvider() {
 	        @Override
 	        public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+	        	System.out.println("1234Login");
 	            String userid = authentication.getName();
+	            System.out.println("userid==="+userid);
 	            String password = authentication.getCredentials().toString();
+	            System.out.println("password==="+password);
 
 	            BIPS_Password_Management_Entity bipsUserOptional = null;
 	            BIPS_Mer_User_Management_Entity bipsUserMan = null;
