@@ -729,6 +729,7 @@ public class MainController {
 			md.addAttribute("Trans", responseArray);
 		} else if (formmode.equals("DynamicQR")) {
 			md.addAttribute("formmode", "DynamicQR");
+			md.addAttribute("merUserId", merUserId);
 		} /* Device Management */
 		else if (formmode.equals("DeviceManClick")) {
 			md.addAttribute("formmode", "DeviceManClick");
