@@ -3767,6 +3767,11 @@
 										style="display: none;" class="form-control form-control-sm" name="static_QRID"
 										autocomplete="off" readonly>
 								</div>
+								<div>
+									<input type="text" id="staticUserID" value="M0126U001"
+										style="display: none;" class="form-control form-control-sm"  
+										autocomplete="off" readonly>
+								</div>
 							</div>
 						</div>
 						<div class="col-sm-4">
@@ -4452,8 +4457,9 @@
 	}
 
 	function StatClick() {
-		var merchantId = document.getElementById('static_QRID').value;
-		location.href = './staticQRCodeGenarate?formmode=StaticQR&merchantId=' + merchantId;
+	    var merchantId = document.getElementById('static_QRID').value;
+	    var meruserId = document.getElementById('staticUserID').value; 
+	    location.href = './staticQRCodeGenarate?formmode=StaticQR&merchantId=' + merchantId + '&meruserId=' + meruserId;
 	}
 
 	function TransClick() {

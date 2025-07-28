@@ -55,8 +55,8 @@ public class QRCODEServices {
 		return device;
 	}
 
-	public ResponseEntity<cimMerchantQRcodeResponse> getStaticQRCode(String merchantId, String userid, String UNITID,
-			String refNumber) throws UnknownHostException {
+	public ResponseEntity<cimMerchantQRcodeResponse> getStaticQRCode(String merchantId, String merUserId, String userid,
+			String UNITID, String refNumber) throws UnknownHostException {
 		HttpHeaders httpHeaders = new HttpHeaders();
 		httpHeaders.setContentType(MediaType.APPLICATION_JSON);
 		httpHeaders.set("P-ID", sequence.generateMerchantQRPID());
@@ -64,10 +64,10 @@ public class QRCODEServices {
 		httpHeaders.set("PSU-IP-Address", InetAddress.getLocalHost().getHostAddress());
 		httpHeaders.set("PSU-Channel", "BIPS");
 		httpHeaders.set("Merchant_ID", merchantId);
-		//httpHeaders.set("Device_ID", deviceid());
-		//httpHeaders.set("Reference_Number", refNumber);
-		//httpHeaders.set("User-ID", userid);
-		//httpHeaders.set("Unit-ID", UNITID);
+		// httpHeaders.set("Device_ID", deviceid());
+		// httpHeaders.set("Reference_Number", refNumber);
+		// httpHeaders.set("User-ID", userid);
+		// httpHeaders.set("Unit-ID", UNITID);
 		httpHeaders.set("PSU-Resv-Field2", null);
 
 		System.out.println("MMEERR ID");
@@ -119,7 +119,7 @@ public class QRCODEServices {
 		httpHeaders.set("Purpose_Of_Tran", "newtran");
 		httpHeaders.set("Additonal_Detail", "01");
 		httpHeaders.set("Bill_Number", "01");
-		
+
 		// httpHeaders.set("Reference_Number", sequence.generateMerchantQRPID() +
 		// sequence.getRandom4Digit());
 

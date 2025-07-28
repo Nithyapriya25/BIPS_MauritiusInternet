@@ -62,15 +62,17 @@ public class QRController {
 
 	@RequestMapping(value = "staticQRCodeGenarate", method = RequestMethod.GET)
 	public String staticQRCodeGenarate(@RequestParam(required = false) String formmode,
-			@RequestParam(required = false) String merchantId, Model md, HttpServletRequest req)
+			@RequestParam(required = false) String merchantId, 
+			@RequestParam(required = false) String merUserId, Model md, HttpServletRequest req)
 			throws SQLException, UnknownHostException {
 		String userid = (String) req.getSession().getAttribute("USERID");
 		String UNITID = (String) req.getSession().getAttribute("UNITID");
 		System.out.println("merchant id" + merchantId);
+		System.out.println("User id" + userid);
 		String refNumber = sequence.generateMerchantQRPID() + sequence.getRandom4Digit();
 		if (formmode.equals("StaticQR")) {
 			md.addAttribute("formmode", "StaticQR");
-			ResponseEntity<cimMerchantQRcodeResponse> merchantQRResponse = qrCODEServices.getStaticQRCode(merchantId,
+			ResponseEntity<cimMerchantQRcodeResponse> merchantQRResponse = qrCODEServices.getStaticQRCode(merchantId,merUserId,
 					userid, UNITID, refNumber);
 			String QrImg;
 			String imageAsBase64;
